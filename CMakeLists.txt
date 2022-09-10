@@ -15,17 +15,18 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmt)
 
 
-# add_library(nand2tetris OBJECT)
-# target_include_directories(nand2tetris PUBLIC include)
-# target_link_libraries(nand2tetris PRIVATE fmt::fmt)
+add_library(nand2tetris OBJECT)
+add_subdirectory(src)
+target_include_directories(nand2tetris PUBLIC include)
+target_link_libraries(nand2tetris PRIVATE fmt::fmt)
 
 
 add_executable(runner main.cpp)
 target_link_libraries(runner PRIVATE fmt::fmt)
 
-option(ENABLE_TESTS "Enable tests" OFF)
-
-if (${ENABLE_TESTS})
+option(ENABLE_TESTS "Enable tests" ON)
+if (ENABLE_TESTS)
+message(STATUS "Enabling Tests")
 enable_testing()
 add_subdirectory(tests)
 endif()

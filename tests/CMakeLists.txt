@@ -7,4 +7,12 @@ FetchContent_Declare(
 
 set(CMAKE_BUILD_TYPE=Release)
 FetchContent_MakeAvailable(ut)
+function (test_exec ID SOURCE)
+    add_executable(${ID} ${SOURCE})
+    target_link_libraries(${ID} PRIVATE nand2tetris Boost::ut fmt::fmt-header-only)
+    target_compile_definitions(${ID} PRIVATE ASSEMBLER_TEST_INPUT_DIR="${CMAKE_SOURCE_DIR}/projects/06/")
+    add_test(NAME ${ID} COMMAND ${ID})
+endfunction()
 
+
+test_exec(test_lexer test_lexer.cpp)
