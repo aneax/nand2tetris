@@ -10,9 +10,10 @@ FetchContent_MakeAvailable(ut)
 function (test_exec ID SOURCE)
     add_executable(${ID} ${SOURCE})
     target_link_libraries(${ID} PRIVATE nand2tetris Boost::ut fmt::fmt-header-only)
-    target_compile_definitions(${ID} PRIVATE ASSEMBLER_TEST_INPUT_DIR="${CMAKE_SOURCE_DIR}/projects/06/")
+    target_compile_definitions(${ID} PRIVATE ASSEMBLER_TEST_INPUT_DIR="${CMAKE_SOURCE_DIR}/tests/inputs")
     add_test(NAME ${ID} COMMAND ${ID})
 endfunction()
 
 
 test_exec(test_lexer test_lexer.cpp)
+test_exec(test_parser test_parser.cpp)

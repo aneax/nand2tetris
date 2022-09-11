@@ -1,6 +1,8 @@
 #ifndef NAND2TETRIS_INCLUDE_TOKEN_HPP
 #define NAND2TETRIS_INCLUDE_TOKEN_HPP
+#include "FwdDecl.hpp"
 #include "Reader.hpp"
+#include <string_view>
 #include <vector>
 #include <string>
 namespace hack
@@ -36,6 +38,7 @@ enum class TokenType {
   DNULL,
   LParantheses,
   RParantheses,
+  NewLine,
   FEOF
 };
 
@@ -60,6 +63,7 @@ class Token
 
     [[nodiscard]] auto begin() const noexcept -> Iterator { return begin_; }
     [[nodiscard]] auto end() const noexcept -> Iterator { return end_; }
+    [[nodiscard]] auto line() const noexcept -> size_t { return begin_.line; }
 
     void set_type(TokenType type) { type_ = type; }
 
@@ -68,8 +72,18 @@ class Token
     Iterator  begin_;
     Iterator  end_;
 };
+
 auto operator<<(std::ostream& out, const TokenType& token) -> std::ostream&;
 auto operator<<(std::ostream& out, const Token& token) -> std::ostream&;
-auto get_tokens(FileReader& reader) -> std::vector<Token>;
+auto to_string(const Token& token) -> std::string;
+
+auto get_tokens(FileReader& reader) -> TokenVector;
+auto is_equal(std::string_view lhs, std::string_view rhs) -> bool;
+namespace constants
+{
+static constexpr std::string_view EmptyLiteral = "Empty";
+static constexpr Token EmptyToken(TokenType::NewLine, Iterator(EmptyLiteral.data(), 1, 1),
+                                  Iterator(EmptyLiteral.data() + EmptyLiteral.size(), 1, 3));
+}   //namespace constants
 }   //namespace hack
 #endif

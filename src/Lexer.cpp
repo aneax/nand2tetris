@@ -1,6 +1,7 @@
 #include "Lexer.hpp"
 #include "Errors.hpp"
 #include "Reader.hpp"
+#include "fmt/core.h"
 
 #include <map>
 namespace hack
@@ -53,13 +54,13 @@ class Lexer
       keywords_.insert({"JEQ", T::JEQ});
       keywords_.insert({"JNE", T::JNE});
       keywords_.insert({"JMP", T::JMP});
-      keywords_.insert({"M", T::M});
-      keywords_.insert({"D", T::D});
-      keywords_.insert({"DM", T::DM});
-      keywords_.insert({"A", T::A});
-      keywords_.insert({"AM", T::AM});
-      keywords_.insert({"AD", T::AD});
-      keywords_.insert({"ADM", T::ADM});
+      //keywords_.insert({"M", T::M});
+      //keywords_.insert({"D", T::D});
+      //keywords_.insert({"DM", T::DM});
+      //keywords_.insert({"A", T::A});
+      //keywords_.insert({"AM", T::AM});
+      //keywords_.insert({"AD", T::AD});
+      //keywords_.insert({"ADM", T::ADM});
     }
 
     auto advance(size_t num = 1) -> void;
@@ -129,6 +130,8 @@ auto operator<<(std::ostream& out, const TokenType& token) -> std::ostream&
     TOK(DNULL);
     TOK(LParantheses);
     TOK(RParantheses);
+    TOK(NewLine);
+    TOK(SemiColon);
     case TokenType::FEOF:
       out << "EOF";
       break;
@@ -144,6 +147,13 @@ auto operator<<(std::ostream& out, const Token& token) -> std::ostream&
   out << token.type() << "<" << begin.line << ":" << begin.column << ", " << end.line << ":"
       << end.column << "> " << token.string_view();
   return out;
+}
+
+auto to_string(const Token& token) -> std::string
+{
+  std::stringstream ss;
+  ss << token;
+  return ss.str();
 }
 
 auto Lexer::advance(size_t num) -> void
@@ -287,11 +297,11 @@ void Lexer::scan()
     PUSH('|', T::Or);
     PUSH('=', T::Equal);
     PUSH(';', T::SemiColon);
+    PUSH('\n', T::NewLine);
     PUSH_CUSTOM('\000', {})
     PUSH_CUSTOM(' ', {})
     PUSH_CUSTOM('\r', {})
     PUSH_CUSTOM('\t', {})
-    PUSH_CUSTOM('\n', {});
     PUSH_CUSTOM('/', { (void)until('\n'); });
     default:
       {
@@ -321,6 +331,34 @@ auto get_tokens(FileReader& reader) -> std::vector<Token>
   lexer.start();
   lexer.check_errors();
   return lexer.tokens();
+}
+
+auto is_equal(std::string_view lhs, std::string_view rhs) -> bool
+{
+  const auto* lcurrent = lhs.begin();
+  const auto* rcurrent = rhs.begin();
+  const auto* lend     = lhs.end();
+  const auto* rend     = rhs.end();
+
+  for (;; ++lcurrent, ++rcurrent) {
+    while (is_white_space(*lcurrent)) {
+      ++lcurrent;
+    }
+
+    while (is_white_space(*rcurrent)) {
+      ++rcurrent;
+    }
+
+    if (lcurrent == lend && rcurrent == rend) {
+      return true;
+    }
+
+    if (*lcurrent != *rcurrent) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }   //namespace hack

@@ -3,5 +3,7 @@ target_sources(nand2tetris PRIVATE
     Reader.cpp
     Lexer.cpp
     Errors.cpp
+    Parser.cpp
+    SrcRewriteVisitor.cpp
 
 )
