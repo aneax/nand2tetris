@@ -30,10 +30,9 @@ class Statement
       Symbol,
       AInst,
       CInst,
-      Expr,
-      Jump,
-      UnaryOp,
-      BinaryOp
+      Dest,
+      Comp,
+      Jump
     };
 
     Statement() : Statement(Type::Invalid, constants::EmptyToken) {}
@@ -52,6 +51,7 @@ class Statement
     [[nodiscard]] auto node_type() const noexcept -> Type { return type_; }
     [[nodiscard]] auto children() const noexcept -> StatementVector { return children_; }
     [[nodiscard]] auto is_invalid() const noexcept -> bool { return type_ == Type::Invalid; }
+    [[nodiscard]] auto isa(Type type) const noexcept -> bool { return type_ == type; }
 
   private:
     Type  type_;
@@ -78,12 +78,8 @@ class VisitorBase
         DISPATCH(Symbol);
         DISPATCH(AInst);
         DISPATCH(CInst);
-        DISPATCH(Expr);
-        DISPATCH(UnaryOp);
-        DISPATCH(BinaryOp);
-        DISPATCH(Jump);
-        case T::Invalid:
-          throw RuntimeError("Statement can't be invalied");
+        default:
+          throw RuntimeError("Unreachable region.");
       }
     }
 

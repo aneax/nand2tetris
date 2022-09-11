@@ -4,3 +4,6 @@
 **/.vscode
 **/.idea
 /nand2tetris
+**/*.hack_resolved
+**/*.asm_resolved
+**/*.asm_hack

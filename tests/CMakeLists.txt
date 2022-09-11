@@ -17,3 +17,7 @@ endfunction()
 
 test_exec(test_lexer test_lexer.cpp)
 test_exec(test_parser test_parser.cpp)
+test_exec(test_bit_conversion test_bit_conversion.cpp)
+test_exec(test_assembler test_assembler.cpp)
+test_exec(test_resolved_writer test_parser.cpp)
+target_compile_definitions(test_resolved_writer PRIVATE POST_ASSEMBLER_RUN=True)

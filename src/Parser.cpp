@@ -4,7 +4,6 @@
 #include "Ast.hpp"
 #include "Parser.hpp"
 #include "Errors.hpp"
-#include "SymbolTable.hpp"
 #include <cstddef>
 #include <optional>
 
@@ -148,7 +147,7 @@ auto Parser::label_() -> Statement
   if (labels_.contains(token.string())) {
     throw ParseError("Multiple Label definitions: " + token.string());
   }
-  labels_.insert(token.string(), stmts_.size() + 1);
+  labels_.insert({token.string(), stmts_.size() - labels_.size()});
   return stmt;
 }
 
@@ -159,14 +158,19 @@ auto Parser::a_inst_() -> Statement
 
 auto Parser::c_inst_() -> Statement
 {
-  auto left = consume_();
+  StatementVector children;
 
+  auto   left = consume_();
   size_t line = left.begin().line;
 
-  StatementVector children;
+  ST type = ST::Dest;
+
   if (match_(T::Equal)) {
-    children.emplace_back(ST::BinaryOp, consume_());
+    children.emplace_back(type, left);
+    consume_();
     children.emplace_back(expression_(line));
+  } else {
+    children.emplace_back(ST::Comp, left);
   }
 
   if (match_(T::SemiColon)) {
@@ -182,28 +186,34 @@ auto Parser::expression_(size_t line) -> Statement
 {
   Statement              parent;
   std::vector<Statement> children;
+
+  auto begin = current_;
+  auto end   = begin;
   while (line == current_token_().line() && !match_(T::SemiColon) && !is_end_()) {
-    if (match_(T::Identifier, T::Number)) {
-      children.emplace_back(ST::Expr, consume_());
-    } else {
-      //is operator
-      if (!children.empty()) {
-        parent = Statement(ST::BinaryOp, consume_());
-      } else {
-        parent = Statement(ST::UnaryOp, consume_());
-      }
-      auto expr = expression_(line);
-      children.push_back(expr);
-    }
+    //if (match_(T::Identifier, T::Number)) {
+    //  children.emplace_back(ST::Expr, consume_());
+    //} else {
+    //  //is operator
+    //  if (!children.empty()) {
+    //    parent = Statement(ST::BinaryOp, consume_());
+    //  } else {
+    //    parent = Statement(ST::UnaryOp, consume_());
+    //  }
+    //  auto expr = expression_(line);
+    //  children.push_back(expr);
+    //}
+    end = current_;
+    advance_();
   }
 
-  if (children.size() == 1 && parent.is_invalid()) {
-    return children[0];
-  }
+  Token token(begin->type(), begin->begin(), end->end());
+  //if (children.size() == 1 && parent.is_invalid()) {
+  //  return children[0];
+  //}
 
-  parent.set_children(std::move(children));
+  //parent.set_children(std::move(children));
 
-  return std::move(parent);
+  return {ST::Comp, token};
 }
 
 auto Parser::symbol_() -> Statement
@@ -217,7 +227,7 @@ auto Parser::parse() -> Data
     stmts_.push_back(statements_());
   }
 
-  return {std::move(stmts_), std::move(labels_)};
+  return {.stmts = std::move(stmts_), .symbols = std::move(labels_)};
 }
 
 auto parse(const TokenVector& token) -> Data

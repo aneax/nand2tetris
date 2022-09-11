@@ -4,6 +4,9 @@ target_sources(nand2tetris PRIVATE
     Lexer.cpp
     Errors.cpp
     Parser.cpp
-    SrcRewriteVisitor.cpp
+    OriginalSourceWriter.cpp
+    Instructions.cpp
+    Assembler.cpp
+    SymbolResolvedWriter.cpp
 
 )

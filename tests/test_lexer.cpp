@@ -25,11 +25,9 @@ extern void test_lexer()
   using namespace boost::ut;
   fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
   fs::path source = ASSEMBLER_TEST_INPUT_DIR;
-  source/="add/";
+  source /= "add/";
   if (fs::exists(source)) {
-    run(source.string(), [](std::string_view data) {
-      run_lexer(data);
-    });
+    run([](const fs::path& src) { run_lexer(src.string()); }, source);
   } else {
     expect((false) >> fatal) << "Directory not found";
   }

@@ -38,45 +38,32 @@ class SrcRewriter : public ConstStmtVisitor<SrcRewriter>
     //NOLINTNEXTLINE
     void VisitCInst(const Statement* stmt)
     {
-      ss_ << stmt->token().string_view();
-      Visit(stmt->children());
+      using Type = Statement::Type;
+      //ss_ << stmt->token().string_view();
+      const auto& children = stmt->children();
+      auto        begin    = children.begin();
+      auto        end      = children.end();
+      if (begin->isa(Type::Dest)) {
+        ss_ << begin->token().string_view() << "=";
+        ++begin;
+      }
+
+      for (; begin != end; ++begin) {
+        if (begin->isa(Type::Comp)) {
+          VisitExpr(begin.base());
+        }
+
+        if (begin->isa(Type::Jump)) {
+          //ss_ << ";";
+          VisitJump(begin.base());
+        }
+      }
       ss_ << "\n";
     }
 
     //NOLINTNEXTLINE
     void VisitExpr(const Statement* stmt) { ss_ << stmt->token().string_view(); }
 
-    //NOLINTNEXTLINE
-    void VisitBinaryOp(const Statement* stmt)
-    {
-      using T = TokenType;
-      switch (stmt->token().type()) {
-        case T::Add:
-        case T::Sub:
-        case T::And:
-        case T::Or:
-        case T::Not:
-          Base::Visit(&stmt->child(0));
-          ss_ << stmt->token().string_view();
-          Base::Visit(&stmt->child(1));
-          break;
-        case T::Equal:
-          ss_ << stmt->token().string_view();
-          break;
-        default:
-          ss_ << "Error: " << stmt->token().string_view();
-          //throw RuntimeError("Op: Unhandled Operator");
-      }
-    }
-
-    //NOLINTNEXTLINE
-    void VisitUnaryOp(const Statement* stmt)
-    {
-      using T = TokenType;
-
-      ss_ << stmt->token().string_view();
-      Visit(stmt->children());
-    }
     //NOLINTNEXTLINE
     void VisitJump(const Statement* stmt)
     {
@@ -91,4 +78,5 @@ auto src_rewrite(const StatementVector& stmts) -> std::string
   writer.Visit(stmts);
   return writer.string();
 }
+
 }   //namespace hack
