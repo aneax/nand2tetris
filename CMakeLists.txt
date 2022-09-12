@@ -15,14 +15,21 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmt)
 
 
-add_library(nand2tetris OBJECT)
+
+add_library(assembler OBJECT)
+add_library(vasm OBJECT)
+add_library(utils OBJECT)
+add_subdirectory(include)
 add_subdirectory(src)
-target_include_directories(nand2tetris PUBLIC include)
-target_link_libraries(nand2tetris PRIVATE fmt::fmt)
+
+# add_library(nand2tetris OBJECT)
+add_library(nand2tetris OBJECT $<TARGET_OBJECTS:utils> $<TARGET_OBJECTS:assembler>)
+target_link_libraries(nand2tetris PRIVATE fmt::fmt-header-only)
+# target_link_libraries(nand2tetris PRIVATE utils vasm assembler)
 
 
 add_executable(runner main.cpp)
-target_link_libraries(runner PRIVATE fmt::fmt)
+target_link_libraries(runner PRIVATE fmt::fmt-header-only)
 
 option(ENABLE_TESTS "Enable tests" ON)
 if (ENABLE_TESTS)

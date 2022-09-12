@@ -3,7 +3,6 @@
 #include "Lexer.hpp"
 #include "Ast.hpp"
 #include "Parser.hpp"
-#include "Errors.hpp"
 #include <cstddef>
 #include <optional>
 

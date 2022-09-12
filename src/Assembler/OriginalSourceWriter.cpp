@@ -1,5 +1,4 @@
 #include "Ast.hpp"
-#include "Errors.hpp"
 #include "Lexer.hpp"
 #include <fmt/core.h>
 

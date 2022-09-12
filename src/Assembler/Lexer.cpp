@@ -1,7 +1,7 @@
 #include "Lexer.hpp"
-#include "Errors.hpp"
-#include "Reader.hpp"
-#include "fmt/core.h"
+#include <Errors.hpp>
+#include <Reader.hpp>
+#include <fmt/core.h>
 
 #include <map>
 namespace hack
@@ -361,4 +361,25 @@ auto is_equal(std::string_view lhs, std::string_view rhs) -> bool
   return true;
 }
 
+auto max_arg_exceeded_error(const Token& token, size_t length, size_t max) -> std::string
+{
+  std::stringstream ss;
+  ss << "Max Number of Supported Argument Exceeded at: " << token.begin() << ". Supported: " << max
+     << " Actual: " << length << "\n";
+  return ss.str();
+}
+
+auto condition_empty_error(const Token& token) -> std::string
+{
+  std::stringstream ss;
+  ss << "Condition Empty at: " << token.begin() << ". Required at least one condition.\n";
+  return ss.str();
+}
+
+auto missing_argument_error(const Token& token) -> std::string
+{
+  std::stringstream ss;
+  ss << "Missing argument. Expects an expression before " << token << "\n";
+  return ss.str();
+}
 }   //namespace hack

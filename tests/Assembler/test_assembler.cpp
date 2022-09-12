@@ -1,7 +1,5 @@
-
-#include "Instructions.hpp"
-#include "fmt/core.h"
-#include "runner.hpp"
+#include "../runner.hpp"
+#include <Instructions.hpp>
 #include <Ast.hpp>
 #include <Reader.hpp>
 #include <Lexer.hpp>
@@ -12,16 +10,7 @@
 #include <string_view>
 #include <boost/ut.hpp>
 #include <fstream>
-
-auto to_string(const hack::BitVector& vec) -> std::string
-{
-  std::stringstream ss;
-  for (const auto& bit : vec) {
-    ss << bit << "\n";
-  }
-  return ss.str();
-}
-
+#include <fmt/core.h>
 static void run_assemble(std::string_view src, std::string_view sol_src)
 {
   using namespace hack;

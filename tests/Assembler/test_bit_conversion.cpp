@@ -1,5 +1,6 @@
 
 #include <Instructions.hpp>
+#include <Ast.hpp>
 #include <boost/ut.hpp>
 using namespace boost::ut;
 using namespace hack;

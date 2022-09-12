@@ -43,9 +43,6 @@ class ErrorReporter
     std::vector<std::string> errors_;
 };
 
-auto max_arg_exceeded_error(const Token& token, size_t length, size_t max) -> std::string;
-auto condition_empty_error(const Token& token) -> std::string;
-auto missing_argument_error(const Token& token) -> std::string;
 }   //namespace hack
 
 #endif

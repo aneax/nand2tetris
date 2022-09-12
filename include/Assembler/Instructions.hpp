@@ -1,7 +1,6 @@
 #ifndef NAND2TETRIS_INCLUDE_DRIVER_HPP
 #define NAND2TETRIS_INCLUDE_DRIVER_HPP
 #include "FwdDecl.hpp"
-#include "Ast.hpp"
 #include <cstdint>
 
 namespace hack
@@ -43,7 +42,7 @@ static constexpr size_t DestA = 0b100;
 void populate_predefined_symbols(Data* data);
 auto get_a_inst(uint64_t value) -> Bit;
 auto get_c_inst(bool type_a, uint64_t cmd, uint64_t dest, uint64_t jmp) -> Bit;
-
+auto to_string(const BitVector& vec) -> std::string;
 }   //namespace hack
 
 #endif

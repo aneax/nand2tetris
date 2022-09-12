@@ -1,7 +1,6 @@
 
-#include "Instructions.hpp"
-#include "fmt/core.h"
-#include "runner.hpp"
+#include "../runner.hpp"
+#include <Instructions.hpp>
 #include <Ast.hpp>
 #include <Reader.hpp>
 #include <Lexer.hpp>
@@ -10,6 +9,7 @@
 #include <string_view>
 #include <boost/ut.hpp>
 #include <fstream>
+#include <fmt/core.h>
 
 template <bool PostRun>
 static void run_parser(std::string_view id)

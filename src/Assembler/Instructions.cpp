@@ -1,6 +1,7 @@
 #include "Instructions.hpp"
 #include "FwdDecl.hpp"
 #include "Lexer.hpp"
+#include "Ast.hpp"
 
 namespace hack
 {
@@ -137,5 +138,14 @@ void populate_predefined_symbols(Data* data)
   data->dest_table = prepare_dest_table();
   data->jump_table = prepare_jump_table();
   predefined_symbols(data->symbols);
+}
+
+auto to_string(const BitVector& vec) -> std::string
+{
+  std::stringstream ss;
+  for (const auto& bit : vec) {
+    ss << bit << "\n";
+  }
+  return ss.str();
 }
 }   //namespace hack
