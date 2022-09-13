@@ -78,7 +78,6 @@ auto operator<<(std::ostream& out, const Token& token) -> std::ostream&;
 auto to_string(const Token& token) -> std::string;
 
 auto get_tokens(FileReader& reader) -> TokenVector;
-auto is_equal(std::string_view lhs, std::string_view rhs) -> bool;
 auto max_arg_exceeded_error(const Token& token, size_t length, size_t max) -> std::string;
 auto condition_empty_error(const Token& token) -> std::string;
 auto missing_argument_error(const Token& token) -> std::string;

@@ -1,5 +1,6 @@
 #include "../runner.hpp"
 #include <Instructions.hpp>
+#include <Characters.hpp>
 #include <Ast.hpp>
 #include <Reader.hpp>
 #include <Lexer.hpp>

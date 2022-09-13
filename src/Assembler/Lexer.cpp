@@ -1,44 +1,12 @@
 #include "Lexer.hpp"
 #include <Errors.hpp>
 #include <Reader.hpp>
+#include <Characters.hpp>
 #include <fmt/core.h>
 
 #include <map>
 namespace hack
 {
-static constexpr char Slash = '/';
-static constexpr char Start = '*';
-static constexpr char White = ' ';
-static constexpr char Tab   = '\t';
-static constexpr char Eol   = '\0';
-
-static auto is_white_space(char ch) -> bool
-{
-  return (' ' == ch) || ('\n' == ch) || ('\r' == ch) || (Tab == ch) || ('\b' == ch) || ('\v' == ch)
-      || ('\f' == ch);
-}
-
-static auto is_alpha(char ch) -> bool
-{
-  return (ch == '_') || (ch == '.') || (ch == '$') || ((ch >= 'a') && (ch <= 'z'))
-      || ((ch >= 'A') && (ch <= 'Z'));
-}
-
-static auto is_digit(char ch) -> bool
-{
-  return (ch >= '0') && (ch <= '9');
-}
-
-static auto is_operator(char ch) -> bool
-{
-  return ('+' == ch) || ('-' == ch) || ('=' == ch) || ('!' == ch) || ('(' == ch) || (')' == ch)
-      || ('@' == ch) || ('&' == ch) || ('|' == ch);
-}
-
-static auto is_alpha_numeric(char ch) -> bool
-{
-  return is_digit(ch) || is_alpha(ch);
-}
 
 class Lexer
 {
@@ -49,7 +17,7 @@ class Lexer
     {
       keywords_.insert({"JGT", T::JGT});
       keywords_.insert({"JGE", T::JGE});
-      keywords_.insert({"JGT", T::JLT});
+      keywords_.insert({"JLT", T::JLT});
       keywords_.insert({"JLE", T::JLE});
       keywords_.insert({"JEQ", T::JEQ});
       keywords_.insert({"JNE", T::JNE});
@@ -331,34 +299,6 @@ auto get_tokens(FileReader& reader) -> std::vector<Token>
   lexer.start();
   lexer.check_errors();
   return lexer.tokens();
-}
-
-auto is_equal(std::string_view lhs, std::string_view rhs) -> bool
-{
-  const auto* lcurrent = lhs.begin();
-  const auto* rcurrent = rhs.begin();
-  const auto* lend     = lhs.end();
-  const auto* rend     = rhs.end();
-
-  for (;; ++lcurrent, ++rcurrent) {
-    while (is_white_space(*lcurrent)) {
-      ++lcurrent;
-    }
-
-    while (is_white_space(*rcurrent)) {
-      ++rcurrent;
-    }
-
-    if (lcurrent == lend && rcurrent == rend) {
-      return true;
-    }
-
-    if (*lcurrent != *rcurrent) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 auto max_arg_exceeded_error(const Token& token, size_t length, size_t max) -> std::string

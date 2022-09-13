@@ -90,6 +90,7 @@ static auto prepare_comp_table() -> CompTable
   //a = 1
   insert_comp("M", true, ROW4);
   insert_comp("!M", true, ROW6);
+  insert_comp("-M", true, ROW8);
   insert_comp("M+1", true, ROW10);
   insert_comp("M-1", true, ROW12);
   insert_comp("D+M", true, ROW13);

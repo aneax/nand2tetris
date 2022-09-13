@@ -6,6 +6,7 @@
 #include <string>
 #include <cassert>
 #include <ostream>
+#include <string_view>
 
 namespace hack
 {
@@ -13,10 +14,10 @@ namespace hack
 namespace internal
 {
 struct StringHolder {
-    const std::string data;
+    const std::string buffer;
 
     template <typename T>
-    explicit StringHolder(T&& in) : data(std::forward<T>(in))
+    explicit StringHolder(T&& in) : buffer(std::forward<T>(in))
     {
     }
     StringHolder()                    = delete;
@@ -45,6 +46,11 @@ class MemoryInput
     {
     }
 
+    MemoryInput(std::string_view str, const std::string& src = "")
+        : MemoryInput(str.data(), str.data() + str.size(), src)
+    {
+    }
+
     MemoryInput(const MemoryInput&) = delete;
     MemoryInput(MemoryInput&&)      = delete;
 
@@ -59,6 +65,7 @@ class MemoryInput
     [[nodiscard]] auto line() const noexcept -> size_t { return current_.line; }
     [[nodiscard]] auto column() const noexcept -> size_t { return current_.column; }
     [[nodiscard]] auto source() const noexcept -> std::string_view { return source_; }
+    [[nodiscard]] auto data() const noexcept -> std::string_view { return {begin_, end_}; }
 
     auto bump(size_t count = 1) noexcept -> void;
     void restart(size_t line = 1, size_t column = 1);
@@ -75,7 +82,7 @@ struct StringInput : private StringHolder,
     template <typename T>
     explicit StringInput(T&& in, const std::string& source)
         : StringHolder(std::forward<T>(in))
-        , MemoryInput(data.data(), data.data() + data.size(), source)
+        , MemoryInput(buffer.data(), buffer.data() + buffer.size(), source)
     {
     }
 
@@ -94,6 +101,8 @@ struct FileReader : public ReadInput {
     using ReadInput::ReadInput;
     using iterator = ReadInput::iterator;
 };
+
+using MemoryInput = internal::MemoryInput;
 }   //namespace hack
 
 #endif

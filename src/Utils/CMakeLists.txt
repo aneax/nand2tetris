@@ -2,6 +2,7 @@ target_sources(utils PRIVATE
     Errors.cpp
     Iterator.cpp
     Reader.cpp
+    Characters.cpp
     # Driver.cpp
 )
 

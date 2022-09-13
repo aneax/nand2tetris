@@ -6,6 +6,7 @@
 #include <Lexer.hpp>
 #include <Parser.hpp>
 #include <Visitors.hpp>
+#include <Characters.hpp>
 #include <string_view>
 #include <boost/ut.hpp>
 #include <fstream>
