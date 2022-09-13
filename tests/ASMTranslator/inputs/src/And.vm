@@ -1,0 +1,15 @@
+push constant 1
+push constant 1
+and
+push constant 0
+push constant 1
+and
+push constant 0
+push constant 0
+and
+push constant 2
+push constant 3
+and
+push constant 2
+push constant 7
+and

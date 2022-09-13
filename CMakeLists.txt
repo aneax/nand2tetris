@@ -22,6 +22,8 @@ add_library(utils OBJECT)
 add_subdirectory(include)
 add_subdirectory(src)
 
+add_subdirectory(tools)
+
 # add_library(nand2tetris OBJECT)
 add_library(nand2tetris OBJECT $<TARGET_OBJECTS:utils> $<TARGET_OBJECTS:assembler>)
 target_link_libraries(nand2tetris PRIVATE fmt::fmt-header-only)
