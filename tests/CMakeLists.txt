@@ -9,4 +9,4 @@ set(CMAKE_BUILD_TYPE=Release)
 FetchContent_MakeAvailable(ut)
 
 add_subdirectory(Assembler)
-add_subdirectory(VMTranslator)
+add_subdirectory(ASMTranslator)

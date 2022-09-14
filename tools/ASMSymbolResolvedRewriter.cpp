@@ -13,7 +13,7 @@ extern void asm_symbol_resolved_rewriter(const fs::path& src)
 {
   using namespace hack;
   fs::path dest = fs::current_path();
-  dest/=src.filename();
+  dest /= src.filename();
   dest.replace_filename(std::string("out_") + src.filename().string());
   FileReader  reader(src);
   const auto& tokens = get_tokens(reader);
@@ -33,7 +33,7 @@ auto main(int argc, const char** argv) -> int
     throw hack::RuntimeError("Requires filename");
   }
   fs::path src(argv[1]);
-  src= fs::canonical(src);
+  src = fs::canonical(src);
   fmt::print("{}/n", src.string());
   asm_symbol_resolved_rewriter(src);
   return 0;

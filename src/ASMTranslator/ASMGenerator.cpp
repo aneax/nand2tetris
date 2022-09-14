@@ -34,6 +34,9 @@ enum class Operators {
   Or
 };
 
+static constexpr size_t TempLoc = 5;
+//static constexpr size_t ThisLoc =
+
 using SegmentMap  = std::unordered_map<std::string_view, Segment>;
 using OperatorMap = std::unordered_map<std::string_view, Operators>;
 auto populate_segment_map() -> SegmentMap
@@ -159,77 +162,117 @@ class ASMGenerator
     SegmentMap                      segments_;
     OperatorMap                     operators_;
     std::stringstream               ss_;
-    size_t logicalLabelCount_ = 0;
+    size_t                          logicalLabelCount_ = 0;
 };
 
 template <Segment Type>
 auto ASMGenerator::push_(size_t index, [[maybe_unused]] std::string_view src) -> void
 {
-  if constexpr (Type == Segment::Constant) {
-    ss_ << "@" << index << "\n";
-    ss_ << "D=A"
-        << "\n";
-  } else if constexpr (Type == Segment::Pointer) {
+  if constexpr (Type == Segment::Pointer) {
     ss_ << "@" << src << "\n";
-    ss_ << "D=A"
-        << "\n";
-  } else if constexpr (Type == Segment::Static) {
-    ss_ << "@" << src << "." << index << "\n";
-    ss_ << "D=A"
-        << "\n";
+    ss_ << "D=M\n";
+    ss_ << "@SP\n";
+    ss_ << "A=M\n";
+    ss_ << "M=D\n";
+    ss_ << "@SP\n";
+    ss_ << "M=M+1\n";
   } else {
-    ss_ << "@" << index << "\n";
-    ss_ << "D=A";
-    ss_ << "@" << src << "\n";
-    ss_ << "D=D+A\n";
-  }
+    if constexpr (Type == Segment::Constant) {
+      ss_ << "@" << index << "\n";
+      ss_ << "D=A\n";
+    } else if constexpr (Type == Segment::Static) {
+      ss_ << "@" << src << "." << index << "\n";
+      ss_ << "D=M\n";
+    } else if constexpr (Type == Segment::Temp) {
+      ss_ << "@" << index << "\n";
+      ss_ << "D=M\n";
+    } else {
+      //point to index
+      ss_ << "@" << index << "\n";
+      //load constant
+      ss_ << "D=A\n";
+      //point to src= [LCL, ARG, THIS, THAT]
+      ss_ << "@" << src << "\n";
+      //get the actual memory location
+      ss_ << "A=D+M\n";
+      ss_ << "D=M\n";
+    }
 
-  ss_ << "@SP\n";
-  ss_ << "A=M\n";
-  ss_ << "M=D\n";
-  ss_ << "@SP\n";
-  ss_ << "M=M+1\n";
+    ss_ << "@SP\n";
+    ss_ << "A=M\n";
+    ss_ << "M=D\n";
+    ss_ << "@SP\n";
+    ss_ << "M=M+1\n";
+  }
 }
 
 template <Segment Type>
 auto ASMGenerator::pop_(size_t index, std::string_view src) -> void
 {
-  if constexpr (Type == Segment::Constant) {
-    throw RuntimeError("There is no pop constant");
-  } else if constexpr (Type == Segment::Pointer) {
+  if constexpr (Type == Segment::Pointer) {
+    ss_ << "@SP\n";
+    ss_ << "M=M-1\n";
+    ss_ << "A=M\n";
+    ss_ << "D=M\n";
     ss_ << "@" << src << "\n";
-    ss_ << "D=A"
-        << "\n";
-  } else if constexpr (Type == Segment::Static) {
-    ss_ << "@" << src << "." << index << "\n";
-    ss_ << "D=A"
-        << "\n";
+    ss_ << "M=D\n";
   } else {
-    ss_ << "@" << src << "\n";
-    ss_ << "A=A+" << index << "\ns";
-  }
+    if constexpr (Type == Segment::Constant) {
+      throw RuntimeError("There is no pop constant");
+    } else if constexpr (Type == Segment::Static) {
+      ss_ << "@" << src << "." << index << "\n";
+      ss_ << "D=A"
+          << "\n";
+    } else if constexpr (Type == Segment::Temp) {
+      ss_ << "@" << index << "\n";
+      ss_ << "D=A\n";
+    } else {
+      //point to index
+      ss_ << "@" << index << "\n";
+      //load constant
+      ss_ << "D=A\n";
+      //point to src= [LCL, ARG, THIS, THAT]
+      ss_ << "@" << src << "\n";
+      //get the actual memory location
+      ss_ << "D=D+M\n";
+    }
 
-  ss_ << "@SP\n";
-  ss_ << "A=M\n";
-  ss_ << "M=D\n";
-  ss_ << "@SP\n";
-  ss_ << "M=M+1\n";
+    //common portion
+    //store address in R15
+    ss_ << "@R15\n";
+    ss_ << "M=D\n";
+
+    //point to SP
+    ss_ << "@SP\n";
+    //decrease it
+    ss_ << "M=M-1\n";
+    //point to the memory location
+    ss_ << "A=M\n";
+    //load the data
+    ss_ << "D=M\n";
+    //load the address from R15
+    ss_ << "@R15\n";
+    ss_ << "A=M\n";
+    //save to the memory address
+    ss_ << "M=D\n";
+    //SP is already decreased.
+  }
 }
 
 auto ASMGenerator::binary_(std::string_view op) -> void
 {
-  // decrease stack pointer
+  //decrease stack pointer
   ss_ << "@SP\n";
   ss_ << "M=M-1 // SP--\n";
-  // load pointed value to data memory
+  //load pointed value to data memory
   ss_ << "A=M\n";
   ss_ << "D=M // D=*SP\n";
-  // point to SP-1
+  //point to SP-1
   ss_ << "@SP\n";
   ss_ << "A=M-1\n";
-  // do the operation
+  //do the operation
   ss_ << "M=" << op << " // M=*SP\n";
-  // didn't decrease twice, so no need to increase.
+  //didn't decrease twice, so no need to increase.
 
   /*
   @SP;A=M-1;M=D+M; == @SP; M=M-1; A=M; M=D+M; @SP; M=M+1"
@@ -238,49 +281,49 @@ auto ASMGenerator::binary_(std::string_view op) -> void
 
 auto ASMGenerator::unary_(std::string_view op) -> void
 {
-  // point to SP-1
+  //point to SP-1
   ss_ << "@SP\n";
   ss_ << "A=M-1 // SP--\n";
-  // do th operation
+  //do th operation
   ss_ << "M=" << op << "M // M=*SP\n";
-  // didn't change the SP at all, so no need to increase.
+  //didn't change the SP at all, so no need to increase.
 }
 
-auto ASMGenerator::logical_(std::string_view op) -> void 
+auto ASMGenerator::logical_(std::string_view op) -> void
 {
-  // decrease stack pointer
+  //decrease stack pointer
   ss_ << "@SP\n";
   ss_ << "M=M-1 // SP--\n";
-  // load pointed value to data memory
+  //load pointed value to data memory
   ss_ << "A=M\n";
   ss_ << "D=M // D=*SP\n";
-  // point to SP-1
+  //point to SP-1
   ss_ << "@SP\n";
   ss_ << "M=M-1\n";
-  // do subtract operation
+  //do subtract operation
   ss_ << "A=M\n";
   ss_ << "D=M-D\n";
-  // op with jump to LL<count>True if true
-  ss_ << "@LL" << logicalLabelCount_ << "True" << "\n";
+  //op with jump to LL<count>True if true
+  ss_ << "@LL" << logicalLabelCount_ << "True"
+      << "\n";
   ss_ << "D;" << op << "\n";
-  // continue with false branch
+  //continue with false branch
   ss_ << "@SP\n";
   ss_ << "A=M\n";
   ss_ << "M=0 // false\n";
-  // unconditional jump to merge branch
-  ss_ << "@LL" << logicalLabelCount_ << "Merge\n"; 
+  //unconditional jump to merge branch
+  ss_ << "@LL" << logicalLabelCount_ << "Merge\n";
   ss_ << "0;JMP\n";
-  // true branch label
+  //true branch label
   ss_ << "(LL" << logicalLabelCount_ << "True)\n";
   ss_ << "@SP\n";
   ss_ << "A=M\n";
   ss_ << "M=-1 // true\n";
-  // merge branch label
+  //merge branch label
   ss_ << "(LL" << logicalLabelCount_++ << "Merge)\n";
-  // increase SP.
+  //increase SP.
   ss_ << "@SP\n";
   ss_ << "M=M+1\n";
-
 }
 template <typename Apply>
 auto ASMGenerator::push_pop_(Apply apply) -> void
@@ -316,7 +359,7 @@ auto ASMGenerator::push_pop_(Apply apply) -> void
     case Segment::Temp:
       static constexpr size_t TempIndex = 5;
 
-      apply.template operator()<Segment::Constant>(TempIndex + index, "");
+      apply.template operator()<Segment::Temp>(TempIndex + index, "");
       break;
   }
 }
