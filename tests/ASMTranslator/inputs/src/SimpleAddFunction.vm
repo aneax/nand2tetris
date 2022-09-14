@@ -1,0 +1,18 @@
+function Sys.init 0
+push constant 4
+push constant 6
+call madd 2 
+label WHILE
+goto WHILE    // loops infinitely
+
+
+// copies the passed arguments and add them and return
+function madd 2
+push argument 0
+pop local 0
+push argument 1
+pop local 1
+push local 0
+push local 1
+add
+return

@@ -35,6 +35,7 @@ static auto populate_keywords() -> PredefinedVMTokenMap
   insert("and", T::Arithmetic);
   insert("or", T::Arithmetic);
   insert("not", T::Arithmetic);
+  insert("return", T::Return);
   return keywords;
 }
 

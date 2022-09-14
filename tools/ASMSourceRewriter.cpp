@@ -14,16 +14,13 @@ extern void asm_symbol_resolved_rewriter(const fs::path& src)
   using namespace hack;
   fs::path dest = fs::current_path();
   dest /= src.filename();
-  dest.replace_filename(std::string("resolved_") + src.filename().string());
+  dest.replace_filename(std::string("rewrite_") + src.filename().string());
   FileReader  reader(src);
   const auto& tokens = get_tokens(reader);
   auto        data   = parse(tokens);
-
-  populate_predefined_symbols(&data);
-  auto          vec          = generate_binary(data);
-  auto          resolved_src = symbol_resolved_rewrite(data);
+  auto written_src = src_rewrite(data.stmts);
   std::ofstream out(dest);
-  out << resolved_src;
+  out << written_src;
   out.flush();
 }
 

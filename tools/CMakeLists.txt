@@ -1,2 +1,5 @@
 add_executable(ASMSymbolResolver ASMSymbolResolvedRewriter.cpp)
 target_link_libraries(ASMSymbolResolver PRIVATE utils assembler)
+
+add_executable(ASMSourceRewriter ASMSourceRewriter.cpp)
+target_link_libraries(ASMSourceRewriter PRIVATE utils assembler)

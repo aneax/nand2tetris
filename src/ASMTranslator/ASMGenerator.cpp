@@ -2,7 +2,9 @@
 #include "Errors.hpp"
 #include "VMData.hpp"
 #include <Traits.hpp>
+#include <cstddef>
 #include <filesystem>
+#include <initializer_list>
 #include <sstream>
 #include <string_view>
 #include <unordered_map>
@@ -90,6 +92,12 @@ class ASMGenerator
     void translate_pop_();
     void translate_arith_();
     void translate_logical_();
+    void translate_if_();
+    void translate_label_();
+    void translate_function_();
+    void translate_call_();
+    void translate_goto_();
+    void translate_return_();
 
     template <typename Apply>
     auto push_pop_(Apply apply) -> void;
@@ -100,60 +108,11 @@ class ASMGenerator
     template <Segment Type>
     auto pop_(size_t index, std::string_view src) -> void;
 
+    auto goto_(std::string_view label) -> void;
+    auto label_(std::string_view label) -> void;
     auto binary_(std::string_view op) -> void;
     auto unary_(std::string_view op) -> void;
     auto logical_(std::string_view op) -> void;
-
-    template <typename T>
-    requires is_any_one_of_v<T, std::string_view, size_t>
-    inline void a_inst_(T value)
-    {
-      ss_ << "@" << value << "\n";
-    }
-
-    template <typename T>
-    requires is_any_one_of_v<T, std::string_view, size_t>
-    inline void c_inst_(T src, std::string_view dest, std::string_view jump = "",
-                        std::string_view comment = "")
-    {
-      if (!dest.empty()) {
-        ss_ << dest << "=";
-      }
-      ss_ << src;
-      if (!jump.empty()) {
-        ss_ << ";" << jump;
-      }
-      if (!comment.empty()) {
-        ss_ << "//" << comment;
-      }
-
-      ss_ << "\n";
-    }
-
-    inline auto sp_inc_() -> void
-    {
-      a_inst_("SP"sv);
-      //c_inst_("M+1"sv, "M", "", "SP++");
-      ss_ << "M=M+1 // SP++\n";
-    }
-
-    inline auto sp_dec_() -> void
-    {
-      ss_ << "@SP\n";
-      ss_ << "M=M-1 // SP--\n";
-    }
-
-    inline auto sp_load_(std::string_view dest) -> void
-    {
-      ss_ << "A=M\n";
-      ss_ << "D=";
-      ss_ << dest << " // D=*SP\n";
-    }
-
-    inline auto write_(std::string_view dest, std::string_view src) -> void
-    {
-      ss_ << dest << "=" << src << "\n";
-    }
 
     fs::path                        outfilename_;
     std::string                     filename_;
@@ -162,7 +121,9 @@ class ASMGenerator
     SegmentMap                      segments_;
     OperatorMap                     operators_;
     std::stringstream               ss_;
-    size_t                          logicalLabelCount_ = 0;
+    size_t                          logicalLabelCount_  = 0;
+    size_t                          functionLabelCount_ = 0;
+    std::string_view                currentFunction_{};
 };
 
 template <Segment Type>
@@ -376,6 +337,17 @@ void ASMGenerator::translate_pop_()
   push_pop_(apply);
 }
 
+auto ASMGenerator::goto_(std::string_view label) -> void
+{
+  ss_ << "@" << label << "\n";
+  ss_ << "0;JMP\n";
+}
+
+auto ASMGenerator::label_(std::string_view label) -> void
+{
+  ss_ << "(" << label << ")\n";
+}
+
 void ASMGenerator::translate_arith_()
 {
   Operators op = operators_.at(current_->arg1());
@@ -410,8 +382,142 @@ void ASMGenerator::translate_arith_()
   }
 }
 
+void ASMGenerator::translate_if_()
+{
+  ss_ << "@SP\n";
+  ss_ << "M=M-1\n";
+  ss_ << "A=M\n";
+  ss_ << "D=M\n";
+  ss_ << "@" << current_->arg1() << "\n";
+  ss_ << "D;JNE\n";
+}
+
+void ASMGenerator::translate_label_()
+{
+  label_(current_->arg1());
+}
+
+void ASMGenerator::translate_function_()
+{
+  label_(current_->arg1());
+  for (size_t arg = 0; arg < current_->arg2(); ++arg) {
+    ss_ << "@SP\n";
+    ss_ << "A=M\n";   //load SP location to D
+    ss_ << "M=0\n";
+    ss_ << "@SP\n";
+    ss_ << "M=M+1\n";   //initialize variable
+  }
+}
+
+void ASMGenerator::translate_call_()
+{
+  //push return address
+  ss_ << "@Return" << current_->arg1() << "_" << functionLabelCount_ << "\n";
+  ss_ << "D=A\n";
+  ss_ << "@SP\n";
+  ss_ << "A=M\n";
+  ss_ << "M=D\n";
+  ss_ << "@SP\n";
+  ss_ << "M=M+1\n";
+  //push LCL, ARG, THIS, THAT
+  constexpr std::array<std::string_view, 4> Savee = {"LCL", "ARG", "THIS", "THAT"};
+  for (const auto& src : Savee) {
+    ss_ << "@" << src << "\n";
+    ss_ << "D=M\n";
+    ss_ << "@SP\n";
+    ss_ << "A=M\n";
+    ss_ << "M=D\n";
+    ss_ << "@SP\n";
+    ss_ << "M=M+1\n";
+  }
+  //ARG = SP - 5 - nArgs
+  ss_ << "@SP\n";
+  ss_ << "D=M\n";
+  ss_ << "@5\n";
+  ss_ << "D=D-A\n";
+  ss_ << "@" << current_->arg2() << "\n";
+  ss_ << "D=D-A\n";
+  ss_ << "@ARG\n";
+  ss_ << "M=D\n";
+
+  //LCL=SP
+  ss_ << "@SP\n";
+  ss_ << "D=M\n";
+  ss_ << "@LCL\n";
+  ss_ << "M=D\n";
+
+  //goto functionName
+  goto_(current_->arg1());
+
+  ////return address label
+  ss_ << "(Return" << current_->arg1() << "_" << functionLabelCount_++ << ")\n";
+}
+void ASMGenerator::translate_goto_()
+{
+  goto_(current_->arg1());
+}
+void ASMGenerator::translate_return_()
+{
+  //temp = LCL
+  ss_ << "@LCL\n";
+  ss_ << "D=M\n";
+  ss_ << "@R15\n";
+  ss_ << "M=D\n";
+
+  //get return address = retAddr = *(temp - 5)
+  ss_ << "@R15\n";
+  ss_ << "D=M\n";
+  ss_ << "@5\n";
+  ss_ << "A=D-A\n";   //temp -5
+  ss_ << "D=M\n";     //D=*(temp-5)
+  ss_ << "@R14\n";
+  ss_ << "M=D\n";   //return address in R14
+
+  //save result of the function *ARG=pop()
+  ss_ << "@SP\n";
+  ss_ << "A=M-1\n";
+  ss_ << "D=M\n";
+  ss_ << "@ARG\n";
+  ss_ << "A=M\n";
+  ss_ << "M=D\n";
+
+  //Moves SP to after return value
+  ss_ << "@ARG\n";
+  ss_ << "D=M+1\n";
+  ss_ << "@SP\n";
+  ss_ << "M=D\n";
+
+  //restore callee save registers
+  //dest = *(temp - index)
+  using namespace std::string_view_literals;
+  for (const auto& src : std::initializer_list<std::pair<std::string_view, size_t>>{
+         {"THAT"sv, 1},
+         {"THIS"sv, 2},
+         { "ARG"sv, 3},
+         { "LCL"sv, 4}
+  }) {
+    ss_ << "@R15\n";
+    ss_ << "D=M\n";
+    ss_ << "@" << src.second << "\n";
+    ss_ << "A=D-A\n";
+    ss_ << "D=M\n";
+    ss_ << "@" << src.first << "\n";
+    ss_ << "M=D\n";
+  }
+
+  //goto return address
+  ss_ << "@R14\n";
+  ss_ << "A=M\n";
+  ss_ << "0;JMP\n";
+}
+
 void ASMGenerator::start()
 {
+  //ss_ << "@256\n";
+  //ss_ << "D=A\n";
+  //ss_ << "@SP\n";
+  //ss_ << "M=D\n";
+
   for (; current_ != end_; ++current_) {
     ss_ << "// " << *current_ << "\n";
     switch (current_->type()) {
@@ -432,11 +538,35 @@ void ASMGenerator::start()
           break;
         }
       case CMD::Label:
+        {
+          translate_label_();
+          break;
+        }
       case CMD::Goto:
+        {
+          translate_goto_();
+          break;
+        }
       case CMD::If:
+        {
+          translate_if_();
+          break;
+        }
       case CMD::Function:
+        {
+          translate_function_();
+          break;
+        }
       case CMD::Return:
+        {
+          translate_return_();
+          break;
+        }
       case CMD::Call:
+        {
+          translate_call_();
+          break;
+        }
         break;
     }
   }
