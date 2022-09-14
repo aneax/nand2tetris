@@ -24,10 +24,6 @@ static void run_parser(std::string_view id)
 
   if constexpr (!PostRun) {
     auto actual = src_rewrite(data.stmts);
-    //fmt::print("{}",actual);
-    //std::ofstream out("pong.asm");
-    //out << actual;
-    //out.flush();
     auto required = std::string_view(reader.begin(), reader.end());
     expect((is_equal(required, actual)) >> fatal)
       << "Rewritten source must be equal to the source" << actual;
@@ -52,7 +48,7 @@ static void test_parser()
   using namespace boost::ut;
   fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
   fs::path source = ASSEMBLER_TEST_INPUT_DIR;
-  // source /= "rect/Rect.asm";
+  source /= "src/";
   if (fs::exists(source)) {
     run([](const fs::path& src) { run_parser<PostRun>(src.string()); }, source);
   } else {

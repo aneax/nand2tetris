@@ -25,7 +25,7 @@ extern void test_lexer()
   using namespace boost::ut;
   fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
   fs::path source = ASSEMBLER_TEST_INPUT_DIR;
-  source /= "add/";
+  source /= "src/";
   if (fs::exists(source)) {
     run([](const fs::path& src) { run_lexer(src.string()); }, source);
   } else {

@@ -1,7 +1,7 @@
 function (test_exec ID SOURCE)
     add_executable(${ID} ${SOURCE})
     target_link_libraries(${ID} PRIVATE assembler utils Boost::ut fmt::fmt-header-only)
-    target_compile_definitions(${ID} PRIVATE ASSEMBLER_TEST_INPUT_DIR="${CMAKE_SOURCE_DIR}/tests/inputs")
+    target_compile_definitions(${ID} PRIVATE ASSEMBLER_TEST_INPUT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/inputs")
     add_test(NAME ${ID} COMMAND ${ID})
 endfunction()
 

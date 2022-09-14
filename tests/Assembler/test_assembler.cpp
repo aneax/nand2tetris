@@ -45,10 +45,11 @@ static void test_parser()
 
   std::string actual = "";
   fs::path    source = ASSEMBLER_TEST_INPUT_DIR;
+  source/="src/";
   source /= actual;
 
   fs::path result = ASSEMBLER_TEST_INPUT_DIR;
-  result /= "../assembler";
+  result /= "expected/";
   result /= actual;
 
   if (fs::exists(source)) {
