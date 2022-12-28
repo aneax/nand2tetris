@@ -1,0 +1,10 @@
+function (test_chip ID SOURCE)
+    add_executable(${ID} ${SOURCE})
+    target_link_libraries(${ID} PRIVATE hardware_simulator utils Boost::ut fmt::fmt-header-only)
+    add_test(NAME ${ID} COMMAND ${ID})
+endfunction()
+
+#test_chip(test_bit_gates test_gates.cpp)
+test_chip(test_gates test_gate_defs.cpp)
+test_chip(test_memory test_memory.cpp)
+test_chip(test_computer test_computer.cpp)

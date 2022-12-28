@@ -3,3 +3,6 @@ target_link_libraries(ASMSymbolResolver PRIVATE utils assembler)
 
 add_executable(ASMSourceRewriter ASMSourceRewriter.cpp)
 target_link_libraries(ASMSourceRewriter PRIVATE utils assembler)
+
+add_executable(HardwareSimulator HardwareSimulator.cpp)
+target_link_libraries(HardwareSimulator PRIVATE utils hardware_simulator)

@@ -10,7 +10,7 @@
 #include <string_view>
 #include <boost/ut.hpp>
 #include <fstream>
-#include <fmt/core.h>
+// #include <fmt/core.h>
 
 template <bool PostRun>
 static void run_parser(std::string_view id)
@@ -46,7 +46,7 @@ static void test_parser()
 {
   namespace fs = std::filesystem;
   using namespace boost::ut;
-  fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
+  // fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
   fs::path source = ASSEMBLER_TEST_INPUT_DIR;
   source /= "src/";
   if (fs::exists(source)) {

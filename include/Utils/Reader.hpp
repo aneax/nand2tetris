@@ -51,8 +51,8 @@ class MemoryInput
     {
     }
 
-    MemoryInput(const MemoryInput&) = delete;
-    MemoryInput(MemoryInput&&)      = delete;
+    MemoryInput(const MemoryInput&) = default;
+    MemoryInput(MemoryInput&&)      = default;
 
     MemoryInput& operator=(const MemoryInput&) = delete;   //NOLINT
     MemoryInput& operator=(MemoryInput&&)      = delete;   //NOLINT
@@ -66,8 +66,13 @@ class MemoryInput
     [[nodiscard]] auto column() const noexcept -> size_t { return current_.column; }
     [[nodiscard]] auto source() const noexcept -> std::string_view { return source_; }
     [[nodiscard]] auto data() const noexcept -> std::string_view { return {begin_, end_}; }
+    [[nodiscard]] auto is_end() const noexcept -> bool { return current_.data == end_; }
+    [[nodiscard]] auto remaining() const noexcept -> size_t
+    {
+      return std::distance(current_.data, end_);
+    }
 
-    auto bump(size_t count = 1) noexcept -> void;
+    auto bump(size_t count = 1) noexcept -> bool;
     void restart(size_t line = 1, size_t column = 1);
 
   protected:

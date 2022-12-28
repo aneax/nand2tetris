@@ -23,7 +23,7 @@ extern void test_lexer()
 {
   namespace fs = std::filesystem;
   using namespace boost::ut;
-  fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
+  // fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
   fs::path source = ASSEMBLER_TEST_INPUT_DIR;
   source /= "src/";
   if (fs::exists(source)) {

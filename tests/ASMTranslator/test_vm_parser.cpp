@@ -5,7 +5,7 @@
 #include <VMParser.hpp>
 #include <ASMGenerator.hpp>
 #include <boost/ut.hpp>
-#include <fmt/format.h>
+// #include <fmt/format.h>
 
 using namespace boost::ut;
 using namespace hack::vasm;
@@ -30,7 +30,7 @@ static void run_test()
 {
   namespace fs = std::filesystem;
   using namespace boost::ut;
-  fmt::print("Root Path: {}\n", TEST_BYTECODE_SRC_DIR);
+  // fmt::print("Root Path: {}\n", TEST_BYTECODE_SRC_DIR);
 
   std::string actual{""};   //NOLINT
   fs::path    source = TEST_BYTECODE_SRC_DIR;
@@ -45,7 +45,7 @@ static void run_test()
     run<false>(
       [&](const fs::path& src) {
         if (src.extension() == ".vm") {
-          fmt::print("Source: {}\n", src.string());
+          // fmt::print("Source: {}\n", src.string());
           fs::path required_src = result / src.filename();
           required_src.replace_extension(".asm");
           run_local(src, required_src);

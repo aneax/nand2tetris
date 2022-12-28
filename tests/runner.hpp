@@ -2,7 +2,7 @@
 #ifndef MINI_CUSTOM_TEST_RUNNER_HPP
 #define MINI_CUSTOM_TEST_RUNNER_HPP
 #include "Filesystem.hpp"
-#include <fmt/core.h>
+//#include <fmt/core.h>
 #include <boost/ut.hpp>
 #include <string_view>
 template <bool Check = true, typename Apply>

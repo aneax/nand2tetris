@@ -29,14 +29,14 @@ static void test_table()
 {
   Data asm_data;
   populate_predefined_symbols(&asm_data);
-  auto&  comp_table = asm_data.comp_table;
-  auto&  dest_table = asm_data.dest_table;
-  auto&  jmp_table  = asm_data.jump_table;
-  bool   isa;
-  size_t comp;
-  size_t dest;
-  size_t jump = hack::constants::VNULL;
-  "D=M"_test  = [&]() {
+  auto&                  comp_table = asm_data.comp_table;
+  auto&                  dest_table = asm_data.dest_table;
+  [[maybe_unused]] auto& jmp_table  = asm_data.jump_table;
+  bool                   isa;
+  size_t                 comp;
+  size_t                 dest;
+  size_t                 jump = hack::constants::VNULL;
+  "D=M"_test                  = [&]() {
     std::tie(isa, comp) = comp_table.at("M");
     dest                = dest_table.at("D");
     Bit bit             = get_c_inst(isa, comp, dest, jump);

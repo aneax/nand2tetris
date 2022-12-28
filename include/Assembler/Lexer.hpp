@@ -1,7 +1,8 @@
-#ifndef NAND2TETRIS_INCLUDE_TOKEN_HPP
-#define NAND2TETRIS_INCLUDE_TOKEN_HPP
+#ifndef NAND2TETRIS_INCLUDE_ASSEMBLER_TOKEN_HPP
+#define NAND2TETRIS_INCLUDE_ASSEMBLER_TOKEN_HPP
 #include "FwdDecl.hpp"
 #include <Reader.hpp>
+#include <TokenBase.hpp>
 #include <string_view>
 #include <vector>
 #include <string>
@@ -42,35 +43,10 @@ enum class TokenType {
   FEOF
 };
 
-class Token
+
+class Token : public TokenBase<TokenType>
 {
-  public:
-    constexpr Token(TokenType token_type, Iterator begin, Iterator end)
-        : type_(token_type)
-        , begin_(begin)
-        , end_(end)
-    {
-    }
-
-    [[nodiscard]] auto type() const -> TokenType { return type_; }
-
-    [[nodiscard]] auto string_view() const -> std::string_view
-    {
-      return std::string_view{begin_.data, end_.data};
-    }
-
-    [[nodiscard]] auto string() const noexcept -> std::string { return {begin_.data, end_.data}; }
-
-    [[nodiscard]] auto begin() const noexcept -> Iterator { return begin_; }
-    [[nodiscard]] auto end() const noexcept -> Iterator { return end_; }
-    [[nodiscard]] auto line() const noexcept -> size_t { return begin_.line; }
-
-    void set_type(TokenType type) { type_ = type; }
-
-  private:
-    TokenType type_;
-    Iterator  begin_;
-    Iterator  end_;
+    using TokenBase<TokenType>::TokenBase;
 };
 
 auto operator<<(std::ostream& out, const TokenType& token) -> std::ostream&;

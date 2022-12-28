@@ -4,19 +4,9 @@
 #include "FwdDecl.hpp"
 #include "Errors.hpp"
 #include "Lexer.hpp"
-#include <type_traits>
+#include "Traits.hpp"
 namespace hack
 {
-
-template <typename T>
-struct make_const_pointer {
-    using type = typename std::add_pointer<typename std::add_const<T>::type>::type;
-};
-
-template <typename T>
-struct make_const_reference {
-    using type = typename std::add_lvalue_reference<typename std::add_const<T>::type>::type;
-};
 
 class Statement;
 using StatementVector = std::vector<Statement>;

@@ -3,8 +3,14 @@
 #include <fstream>
 namespace hack::internal
 {
-auto MemoryInput::bump(size_t count) noexcept -> void
+auto MemoryInput::bump(size_t count) noexcept -> bool
 {
+  bool ret = true;
+  if (count > remaining()) {
+    count = remaining();
+    ret   = false;
+  }
+
   for (size_t it = 0; it < count; ++it) {
     if (current_.data[it] == '\n') {
       ++current_.line;
@@ -14,6 +20,7 @@ auto MemoryInput::bump(size_t count) noexcept -> void
     }
     current_.data += count;
   }
+  return ret;
 }
 
 void MemoryInput::restart(size_t line, size_t column)

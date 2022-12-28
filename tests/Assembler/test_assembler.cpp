@@ -11,7 +11,7 @@
 #include <string_view>
 #include <boost/ut.hpp>
 #include <fstream>
-#include <fmt/core.h>
+//#include <fmt/core.h>
 static void run_assemble(std::string_view src, std::string_view sol_src)
 {
   using namespace hack;
@@ -41,7 +41,7 @@ static void test_parser()
 {
   namespace fs = std::filesystem;
   using namespace boost::ut;
-  fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
+  //fmt::print("Root Path: {}\n", ASSEMBLER_TEST_INPUT_DIR);
 
   std::string actual = "";
   fs::path    source = ASSEMBLER_TEST_INPUT_DIR;
