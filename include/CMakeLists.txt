@@ -1,8 +1,13 @@
+add_library(assembler OBJECT)
+add_library(vasm OBJECT)
+add_library(utils OBJECT)
+add_library(hardware_simulator OBJECT)
+add_library(compiler OBJECT)
+
 target_include_directories(utils PUBLIC Utils)
 target_include_directories(assembler PUBLIC Assembler)
 target_include_directories(vasm PUBLIC ASMTranslator)
-#target_include_directories(compiler PUBLIC Compiler)
-#target_include_directories(mini PUBLIC Mini)
+target_include_directories(compiler PUBLIC Compiler)
+# target_include_directories(mini PUBLIC Mini)
 target_include_directories(hardware_simulator PUBLIC Simulator)
-#target_include_directories(hardware_simulator_v2 PUBLIC Simulator)
-
+# target_include_directories(hardware_simulator_v2 PUBLIC Simulator)

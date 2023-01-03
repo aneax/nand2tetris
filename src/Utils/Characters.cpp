@@ -9,14 +9,20 @@ namespace hack
 
 auto is_white_space(char ch) -> bool
 {
-  return (' ' == ch) || ('\n' == ch) || ('\r' == ch) || ('\t' == ch) || ('\b' == ch) || ('\v' == ch)
-      || ('\f' == ch);
+  return (' ' == ch) || ('\n' == ch) || ('\r' == ch) || ('\t' == ch)
+      || ('\b' == ch) || ('\v' == ch) || ('\f' == ch);
+}
+
+auto is_identifier(char ch) -> bool
+{
+  return (ch == '_') || ((ch >= 'a') && (ch <= 'z'))
+      || ((ch >= 'A') && (ch <= 'Z')) || is_digit(ch);
 }
 
 auto is_alpha(char ch) -> bool
 {
-  return (ch == '_') || (ch == '.') || (ch == '$') || ((ch >= 'a') && (ch <= 'z'))
-      || ((ch >= 'A') && (ch <= 'Z'));
+  return (ch == '_') || (ch == '.') || (ch == '$')
+      || ((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z'));
 }
 
 auto is_digit(char ch) -> bool
@@ -26,8 +32,8 @@ auto is_digit(char ch) -> bool
 
 auto is_operator(char ch) -> bool
 {
-  return ('+' == ch) || ('-' == ch) || ('=' == ch) || ('!' == ch) || ('(' == ch) || (')' == ch)
-      || ('@' == ch) || ('&' == ch) || ('|' == ch);
+  return ('+' == ch) || ('-' == ch) || ('=' == ch) || ('!' == ch) || ('(' == ch)
+      || (')' == ch) || ('@' == ch) || ('&' == ch) || ('|' == ch);
 }
 
 auto is_alpha_numeric(char ch) -> bool
@@ -52,7 +58,8 @@ auto is_equal_detailed(const MemoryInput& lhs, const MemoryInput& rhs)
 
   auto get_current_string = [](const MemoryInput& reader) -> std::string {
     std::stringstream ss;
-    ss << reader.source() << ":" << reader.line() << ":" << reader.column() << "\n";
+    ss << reader.source() << ":" << reader.line() << ":" << reader.column()
+       << "\n";
     return ss.str();
   };
 
@@ -62,7 +69,8 @@ auto is_equal_detailed(const MemoryInput& lhs, const MemoryInput& rhs)
   const auto* rend     = rhs.end();
 
   auto make_return = [&](bool is_equal) {
-    return std::make_tuple(is_equal, get_current_string(lhs), get_current_string(rhs));
+    return std::make_tuple(is_equal, get_current_string(lhs),
+                           get_current_string(rhs));
   };
 
   for (;; ++lcurrent, ++rcurrent) {
